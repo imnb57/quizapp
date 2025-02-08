@@ -4,6 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Timer, Book, Award, RotateCcw, ChevronRight, Brain, Zap } from 'lucide-react';
 import { pythonQuestions } from './pythonquestions';
+import { Instagram } from "lucide-react";
 
 const QuizApp = () => {
   const [currentTopic, setCurrentTopic] = useState(0);
@@ -221,21 +222,28 @@ const QuizApp = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto py-6 px-2 sm:px-6">
-        <header className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2 sm:mb-4 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
-            Python MCQ Quiz
-          </h1>
-          <p className="text-gray-600 text-base sm:text-lg px-4">
-            Test your Python knowledge across various topics
-          </p>
-        </header>
-
-        {quizMode === 'topic-select' && <TopicSelection />}
-        {quizMode === 'quiz' && <QuizInterface />}
-        {quizMode === 'result' && <ResultScreen />}
-      </div>
+    <div className="max-w-6xl mx-auto py-6 px-2 sm:px-6">
+      <header className="text-center mb-8 sm:mb-12">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2 sm:mb-4 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+          Python MCQ Quiz
+        </h1>
+        <p className="text-gray-600 text-base sm:text-lg px-4">
+          Test your Python knowledge across various topics
+        </p>
+        <div className="flex justify-center items-center gap-2 font-bold">
+          <p>made by </p>
+        <Instagram className="w-5 h-5 text-gray-600" />
+          <a href='https://www.instagram.com/imnb57/'>imnb57</a>
+          
+        </div>
+      </header>
+  
+      {quizMode === 'topic-select' && <TopicSelection />}
+      {quizMode === 'quiz' && <QuizInterface />}
+      {quizMode === 'result' && <ResultScreen />}
     </div>
+  </div>
+  
   );
 };
 
