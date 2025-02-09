@@ -66,7 +66,6 @@ const QuizApp = () => {
   };
   
 
- 
   const handlePrevQuestion = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
