@@ -3905,6 +3905,335 @@ export const pythonQuestions = [
             explanation: "`'r+'` mode opens the file for both reading and writing without truncating the file content."
           }
         ]
+      },
+      {
+        topic: "Mixed Collection",
+        questions: [
+          {
+            id: 1,
+            question: "What will be the output of the following code?\n\n    a=\"softwarica\"\n    print(a.upper())",
+            options: [
+              "softwarica",
+              "SOFTWARICA",
+              "Softwarica",
+              "Error"
+            ],
+            answer: "SOFTWARICA",
+            explanation: "The `upper()` method converts all lowercase letters in a string to uppercase."
+          },
+          {
+            id: 2,
+            question: "What will be the output of the following code?\n\n    a=\"@@PYTHON\"\n    print(a.isupper())",
+            options: [
+              "True",
+              "False",
+              "Error",
+              "None"
+            ],
+            answer: "True",
+            explanation: "The `isupper()` method returns `True` if all alphabetic characters in the string are uppercase. Special characters like `@@` do not affect this check."
+          },
+          {
+            id: 3,
+            question: "What will be the output of the following code?\n\n    a=\"@@PYTHON\"\n    print(\"a\".isupper())",
+            options: [
+              "True",
+              "False",
+              "Error",
+              "None"
+            ],
+            answer: "False",
+            explanation: "The `isupper()` method checks if all letters in the string are uppercase. Since `'a'` is lowercase, it returns `False`."
+          },
+          {
+            id: 4,
+            question: "What will be the output of the following code?\n\n    a=\"capital\"\n    print(\"A\".isupper())",
+            options: [
+              "True",
+              "False",
+              "Error",
+              "None"
+            ],
+            answer: "True",
+            explanation: "The `isupper()` method checks if a letter is uppercase. Since `'A'` is uppercase, it returns `True`."
+          },
+          {
+            id: 5,
+            question: "What will be the output of the following code?\n\n    a=\"capital\"\n    print(\"a\")",
+            options: [
+              "a",
+              "capital",
+              "Error",
+              "None"
+            ],
+            answer: "a",
+            explanation: "The statement simply prints the string `'a'`, not the variable `a`."
+          },
+          {
+            id: 6,
+            question: "What will be the output of the following code?\n\n    a=\"capital\"\n    print(a.capitalize(\"c\"))",
+            options: [
+              "Capital",
+              "Error",
+              "capital",
+              "None"
+            ],
+            answer: "Error",
+            explanation: "The `capitalize()` method does not take any arguments. Calling it with an argument results in an error."
+          },
+          {
+            id: 7,
+            question: "What will be the output of the following code?\n\n    a=\"      capital\"\n    print(a.isalnum())",
+            options: [
+              "True",
+              "False",
+              "Error",
+              "None"
+            ],
+            answer: "False",
+            explanation: "The `isalnum()` method returns `True` if all characters are alphanumeric. Since the string contains leading spaces, it returns `False`."
+          },
+          {
+            id: 8,
+            question: "What will be the output of the following code?\n\n    a=\"capital\"\n    print(a.isalnum())",
+            options: [
+              "True",
+              "False",
+              "Error",
+              "None"
+            ],
+            answer: "True",
+            explanation: "The string `'capital'` contains only letters, which are alphanumeric, so `isalnum()` returns `True`."
+          },
+          {
+            id: 9,
+            question: "What will be the output of the following code?\n\n    a=\"1Capital\"\n    print(a.zfill(9))",
+            options: [
+              "01Capital",
+              "1Capital",
+              "001Capital",
+              "Error"
+            ],
+            answer: "01Capital",
+            explanation: "The `zfill()` method pads the string with zeros until it reaches the specified length. Here, it fills the remaining spaces to make the length 9."
+          },
+          {
+            id: 10,
+            question: "What will be the output of the following code?\n\n    a=\"+Capital\"\n    print(a.zfill(9))",
+            options: [
+              "000+Capital",
+              "+0Capital",
+              "+Capital",
+              "Error"
+            ],
+            answer: "+0Capital",
+            explanation: "The `zfill()` method pads with zeros to the left, but places the `'+'` sign at the beginning."
+          },
+          {
+            id: 11,
+            question: "What will be the output of the following code?\n\n    a=\"-Capital\"\n    print(a.zfill(9))",
+            options: [
+              "-0Capital",
+              "000-Capital",
+              "-Capital",
+              "Error"
+            ],
+            answer: "-0Capital",
+            explanation: "The `zfill()` method fills the string with leading zeros while preserving the `'-'` sign at the beginning."
+          },
+          {
+            id: 12,
+            question: "What will be the output of the following code?\n\n    a=\"$Capital\"\n    print(a.zfill(9))",
+            options: [
+              "0$Capital",
+              "000$Capital",
+              "$Capital",
+              "Error"
+            ],
+            answer: "0$Capital",
+            explanation: "The `zfill()` method pads the string with zeros while maintaining the `'$'` sign at the beginning."
+          },
+          {
+            id: 13,
+            question: "What will be the output of the following code?\n\n    a=\"$Capital\"\n    print(a.zfill(9,\"**\"))",
+            options: [
+              "$***Capital",
+              "Error",
+              "****$Capital",
+              "$000Capital"
+            ],
+            answer: "Error",
+            explanation: "The `zfill()` method does not take a second argument. The correct usage only allows a single integer as input."
+          },
+          {
+            id: 14,
+            question: "What will be the output of the following code?\n\n    a=\"$Capital\"\n    print(a.center(9,\"**\"))",
+            options: [
+              "**$Capital**",
+              "*$Capital*",
+              "$Capital",
+              "Error"
+            ],
+            answer: "Error",
+            explanation: "The fill character must be one character only"
+          },
+          {
+            id: 15,
+            question: "What will be the output of the following code?\n\n    a=\"+Capital\"\n    print(a.center(9,\"*\"))",
+            options: [
+              "**+Capital**",
+              "*+Capital",
+              "+Capital",
+              "Error"
+            ],
+            answer: "*+Capital",
+            explanation: "The `center()` method pads the string to the given width using the specified fill character (`'*'`)."
+          },
+          {
+            id: 16,
+            question: "What will be the output of the following code?\n\n    a=\"+Capital9\"\n    print(a.count(\"9\"))",
+            options: [
+              "1",
+              "2",
+              "0",
+              "Error"
+            ],
+            answer: "1",
+            explanation: "The `count()` method returns the number of times the specified substring appears in the string."
+          },
+          {
+            id: 17,
+            question: "What will be the output of the following code?\n\n    a=\"+Cap9ital9\"\n    print(a.find(\"9\"))",
+            options: [
+              "4",
+              "5",
+              "6",
+              "-1"
+            ],
+            answer: "4",
+            explanation: "The `find()` method returns the index of the first occurrence of the specified substring (`'9'` is at index 4)."
+          },
+          {
+            id: 18,
+            question: "What will be the output of the following code?\n\n    a=\"+Cap9ital9\"\n    print(a.rfind(\"9\"))",
+            options: [
+              "4",
+              "5",
+              "9",
+              "Error"
+            ],
+            answer: "9",
+            explanation: "The `rfind()` method returns the highest index at which the substring appears in the string."
+          },
+          {
+            id: 19,
+            question: "What will be the output of the following code?\n\n    a=\"+Cap9ital9\"\n    print(a.find(\"A\"))",
+            options: [
+              "-1",
+              "0",
+              "1",
+              "Error"
+            ],
+            answer: "-1",
+            explanation: "The `find()` method returns `-1` if the specified substring (`'A'`) is not found in the string."
+          },
+          {
+            id: 20,
+            question: "What will be the output of the following code?\n\n    a=\"Cap9\"\n    print(a.isdigit())",
+            options: [
+              "True",
+              "False",
+              "Error",
+              "None"
+            ],
+            answer: "False",
+            explanation: "The `isdigit()` method returns `False` because the string contains non-numeric characters (`'Cap'`)."
+          },
+          {
+            id: 21,
+            question: "What will be the output of the following code?\n\n    a=\"pythON9\"\n    print(a.swapcase())",
+            options: [
+              "PYTHon9",
+              "PYTHON9",
+              "python9",
+              "Error"
+            ],
+            answer: "PYTHon9",
+            explanation: "The `swapcase()` method converts uppercase letters to lowercase and vice versa."
+          },
+          {
+            id: 22,
+            question: "What will be the output of the following code?\n\n    a=\"\\t\"\n    print(a.isspace())",
+            options: [
+              "True",
+              "False",
+              "Error",
+              "None"
+            ],
+            answer: "True",
+            explanation: "The `isspace()` method returns `True` if the string consists only of whitespace characters (like spaces and tabs)."
+          },
+          {
+            id: 23,
+            question: "What will be the output of the following code?\n\n    a=\"\\t\"\n    print(a.isprintable())",
+            options: [
+              "True",
+              "False",
+              "Error",
+              "None"
+            ],
+            answer: "False",
+            explanation: "The `isprintable()` method returns `False` for non-printable characters like tab (`'\\t'`)."
+          },
+          {
+            id: 24,
+            question: "What will be the output of the following code?\n\n    a=\"123abc\"\n    print(a.isalpha())",
+            options: [
+              "True",
+              "False",
+              "Error",
+              "None"
+            ],
+            answer: "False",
+            explanation: "The `isalpha()` method returns `False` because the string contains numeric characters in addition to letters."
+          },
+          {
+            id: 25,
+            question: "What will be the output of the following code?\n\n    a=\"123abc\"\n    print(a.rjust(11,\"#\"))",
+            options: [
+              "#####123abc",
+              "123abc#####",
+              "123abc",
+              "Error"
+            ],
+            answer: "#####123abc",
+            explanation: "The `rjust()` method right-aligns the string and pads it with the specified character (`'#'`) to the left."
+          },
+          {
+            id: 26,
+            question: "What will be the output of the following code?\n\n    a=\"123abc\"\n    print(a.ljust(11,\"#\"))",
+            options: [
+              "#####123abc",
+              "123abc#####",
+              "123abc",
+              "Error"
+            ],
+            answer: "123abc#####",
+            explanation: "The `ljust()` method left-aligns the string and pads it with the specified character (`'#'`) to the right."
+          },
+          {
+            id: 27,
+            question: "What will be the output of the following code?\n\n    a=\"123abc\"\n    print(a.replace('w','1'))",
+            options: [
+              "123abc",
+              "1231bc",
+              "Error",
+              "None"
+            ],
+            answer: "123abc",
+            explanation: "Since the character `'w'` does not exist in the string, `replace()` returns the original string unchanged."
+          }
+        ]
       }
   ];
 export default pythonQuestions;  
