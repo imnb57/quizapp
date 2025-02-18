@@ -173,6 +173,7 @@ const QuizApp = () => {
     const currentQ = scrumQuestions[currentTopic].questions[currentQuestion];
     
     return (
+    <scroll>
       <div className="px-2 sm:px-4 flex flex-col lg:flex-row gap-6">
         
         <div className="flex-1">
@@ -271,6 +272,7 @@ const QuizApp = () => {
           <QuestionJumper />
         </div>
       </div>
+    </scroll>
     );
   };
   
