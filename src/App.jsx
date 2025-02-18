@@ -330,6 +330,9 @@ const QuizApp = () => {
           <p className="text-gray-600 text-base sm:text-lg px-4">
             Test your software design knowledge across various topics
           </p>
+          <p className="text-purple-800 text-base font-black sm:text-sm px-4">
+            Desktop device recommended for better usability
+          </p>
           <div className="flex justify-center items-center gap-2 font-bold">
             <p>made by </p>
             <Instagram className="w-5 h-5 text-gray-600" />
