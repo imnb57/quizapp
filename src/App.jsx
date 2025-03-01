@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Timer, Book, Award, RotateCcw, ChevronRight, Brain, Zap } from 'lucide-react';
-import {   scrumQuestions } from './softwarequestions';
+import {  pythonQuestions } from './pythonquestions';
 import { Instagram } from "lucide-react";
 
 
@@ -29,7 +29,7 @@ const QuizApp = () => {
     setSelectedAnswer(null);
     setTimeLeft(30);
 
-    if (currentQuestion < scrumQuestions[currentTopic].questions.length - 1) {
+    if (currentQuestion < pythonQuestions[currentTopic].questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
       setQuizMode('result');
@@ -75,7 +75,7 @@ const QuizApp = () => {
   const handleAnswer = (option) => {
     setSelectedAnswer(option);
     setShowExplanation(true);
-    const isCorrect = option === scrumQuestions[currentTopic].questions[currentQuestion].answer;
+    const isCorrect = option === pythonQuestions[currentTopic].questions[currentQuestion].answer;
     if (isCorrect) {
       setScore(score + 1);
     }
@@ -111,7 +111,7 @@ const QuizApp = () => {
          
             <div className="overflow-x-auto lg:overflow-visible">
               <div className="flex lg:grid lg:grid-cols-4 gap-2 w-max lg:w-full">
-                {scrumQuestions[currentTopic].questions.map((_, index) => (
+                {pythonQuestions[currentTopic].questions.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => handleJumpToQuestion(index)}
@@ -142,7 +142,7 @@ const QuizApp = () => {
   
   const TopicSelection = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-2 sm:px-4">
-      {scrumQuestions.map((topic, index) => (
+      {pythonQuestions.map((topic, index) => (
         <Card 
           key={index} 
           className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer bg-white w-full"
@@ -170,7 +170,7 @@ const QuizApp = () => {
   );
 
   const QuizInterface = () => {
-    const currentQ = scrumQuestions[currentTopic].questions[currentQuestion];
+    const currentQ = pythonQuestions[currentTopic].questions[currentQuestion];
     
     return (
     <scroll>
@@ -186,7 +186,7 @@ const QuizApp = () => {
                     {timeLeft}s
                   </Badge>
                   <Badge variant="secondary" className="bg-blue-50 text-blue-700 text-xs sm:text-sm">
-                    {currentQuestion + 1}/{scrumQuestions[currentTopic].questions.length}
+                    {currentQuestion + 1}/{pythonQuestions[currentTopic].questions.length}
                   </Badge>
                 </div>
                 <Badge variant="secondary" className="bg-purple-50 text-purple-700 text-xs sm:text-sm">
@@ -194,7 +194,7 @@ const QuizApp = () => {
                 </Badge>
               </div>
               <Progress
-                value={(currentQuestion / scrumQuestions[currentTopic].questions.length) * 100}
+                value={(currentQuestion / pythonQuestions[currentTopic].questions.length) * 100}
                 className="h-2"
               />
               <CardTitle className="text-base sm:text-xl font-bold leading-relaxed">
@@ -286,14 +286,14 @@ const QuizApp = () => {
         </div>
         <h2 className="text-2xl sm:text-3xl font-bold mb-2">Quiz Completed!</h2>
         <p className="text-gray-500 mb-4 sm:mb-6 text-sm sm:text-base">
-          You've completed the {scrumQuestions[currentTopic].topic} quiz
+          You've completed the {pythonQuestions[currentTopic].topic} quiz
         </p>
         <div className="bg-gray-50 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
           <div className="text-3xl sm:text-4xl font-bold text-blue-500 mb-2">
-            {Math.round((score / scrumQuestions[currentTopic].questions.length) * 100)}%
+            {Math.round((score / pythonQuestions[currentTopic].questions.length) * 100)}%
           </div>
           <p className="text-gray-600 text-sm sm:text-base">
-            You scored {score} out of {scrumQuestions[currentTopic].questions.length} questions
+            You scored {score} out of {pythonQuestions[currentTopic].questions.length} questions
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:gap-4">
@@ -327,10 +327,10 @@ const QuizApp = () => {
       <div className="max-w-6xl mx-auto py-6 px-2 sm:px-6">
         <header className="text-center mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold mb-2 sm:mb-4 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
-          Software Design MCQ
+          Python MCQ Questions
           </h1>
           <p className="text-gray-600 text-base sm:text-lg px-4">
-            Test your software design knowledge across various topics
+            Test your python knowledge across various topics
           </p>
           <p className="text-purple-800 text-base font-black sm:text-sm px-4">
             Desktop device recommended for better usability
