@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import{Instagram} from 'lucide-react';
 
 function MyHome() {
   const navigate = useNavigate();

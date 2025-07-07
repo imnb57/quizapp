@@ -2,7 +2,6 @@
 
 
 import React, { useState, useEffect } from "react";
-import { Instagram } from "lucide-react";
 
 function ExamTimer({ duration = 3600 }) {
   const [secondsLeft, setSecondsLeft] = useState(duration);
