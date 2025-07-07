@@ -37,9 +37,15 @@ function MyHome() {
         padding: "2rem",
       }}
     >
+        
       <h1 style={{ fontSize: "2.8rem", marginBottom: "0.5rem", color: "#333" }}>
         🎯 Welcome to the Quiz Portal
       </h1>
+      <div className="flex justify-center items-center gap-2 font-bold">
+            <p>made by </p>
+            <Instagram className="w-5 h-5 text-gray-600" />
+            <a href='https://www.instagram.com/imnb57/'>imnb57</a>
+          </div>
       <p style={{ fontSize: "1.2rem", color: "#555", marginBottom: "2rem" }}>
         Select a quiz to begin:
       </p>
