@@ -1,13 +1,17 @@
-// Place this in src/JavaExam.js
-
-
 import React, { useState, useEffect } from "react";
+import { callDeepSeek } from "../../utils/callDeepSeek";
+import { evaluateAnswers } from "../../utils/evaluateAnswers";
 
-function ExamTimer({ duration = 3600 }) {
+
+let timerResetSignal;
+function ExamTimer({ duration = 3600, resetSignal }) {
   const [secondsLeft, setSecondsLeft] = useState(duration);
 
   useEffect(() => {
-    setSecondsLeft(duration); // Reset timer if duration changes
+    setSecondsLeft(duration);
+  }, [resetSignal]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setSecondsLeft((prev) => {
         if (prev > 0) return prev - 1;
@@ -16,7 +20,7 @@ function ExamTimer({ duration = 3600 }) {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [duration]);
+  }, []);
 
   const formatTime = (secs) => {
     const h = String(Math.floor(secs / 3600)).padStart(2, "0");
@@ -33,8 +37,338 @@ function ExamTimer({ duration = 3600 }) {
     </div>
   );
 }
-export const questionData = {
-  paper1: {
+function buildEvaluationPrompt(questions, answers) {
+  const qnaPairs = questions.map((q, i) => {
+    return `Q${i + 1}: ${q.question}\nA${i + 1}: ${answers[i] || "(No answer provided)"}\n`;
+  }).join("\n");
+
+  return `
+You are an expert Java instructor. A student has answered the following short-answer Java questions. 
+
+Evaluate each response on a scale of 0 to 2 marks. For each question, provide:
+- A brief evaluation (1-2 lines)
+- The awarded marks out of 2
+and the full correct answer of the questions provided
+
+Format:
+Q1: [Evaluation]
+Marks: X/2
+Correct Answer:
+
+Q2: [Evaluation]
+Marks: Y/2
+Correct Answer: 
+
+Student's Answers:
+${qnaPairs}
+  `.trim();
+}
+function buildEvaluationC(topics, answers) {
+  const qnaPairs = topics.map((topic, i) => {
+    return `Q${i + 1}: ${topic}\nA${i + 1}: ${answers[i] || "(No answer provided)"}\n`;
+  }).join("\n");
+
+  return `
+You are an expert Java instructor. A student has answered the following short-note Java topics. 
+
+Evaluate each response on a scale of 0 to 2 marks. For each, provide:
+- A brief evaluation (1-2 lines)
+- The awarded marks out of 2
+- The correct answer
+
+Format:
+Q1: [Evaluation]
+Marks: X/2
+Correct Answer: [...]
+
+Q2: [Evaluation]
+Marks: Y/2
+Correct Answer: [...]
+
+Student's Answers:
+${qnaPairs}
+  `.trim();
+}
+
+
+// Section A - MCQs
+const MCQSection = ({ questions, instructions }) => {
+  const [answers, setAnswers] = useState(Array(questions.length).fill(""));
+  const [submitted, setSubmitted] = useState(false);
+  const [score, setScore] = useState(null);
+
+  useEffect(() => {
+    setAnswers(Array(questions.length).fill(""));
+    setSubmitted(false);
+    setScore(null);
+  }, [questions]);
+
+  const handleSubmit = () => {
+    let correctCount = 0;
+    questions.forEach((q, idx) => {
+      if (answers[idx] === q.answer) correctCount += 1;
+    });
+    setScore(correctCount);
+    setSubmitted(true);
+  };
+
+  return (
+    <section className="bg-white p-6 rounded-lg shadow mb-6">
+      <h2 className="text-xl font-bold mb-2">Section A: Multiple Choice Questions</h2>
+      <p className="text-gray-600 mb-4">{instructions}</p>
+      {questions.map((q, idx) => (
+        <div key={idx} className="mb-5">
+          <p className="font-medium mb-2">
+            Q{idx + 1}.{" "}
+            {q.question.split("\n").map((line, i) => (
+              <span key={i}>
+                {line}
+                <br />
+              </span>
+            ))}
+          </p>
+          {q.options.map((opt, oIdx) => (
+            <label key={oIdx} className="block pl-4 mb-1">
+              <input
+                type="radio"
+                className="mr-2"
+                name={`mcq-${idx}`}
+                value={opt}
+                disabled={submitted}
+                checked={answers[idx] === opt}
+                onChange={() => {
+                  if (!submitted) {
+                    const newAns = [...answers];
+                    newAns[idx] = opt;
+                    setAnswers(newAns);
+                  }
+                }}
+              />
+              {opt}
+              {submitted && opt === q.answer && (
+                <span className="text-green-600 font-bold ml-2">&#10003;</span>
+              )}
+              {submitted && answers[idx] === opt && answers[idx] !== q.answer && (
+                <span className="text-red-600 font-bold ml-2">&#10007;</span>
+              )}
+            </label>
+          ))}
+        </div>
+      ))}
+      {!submitted ? (
+        <button
+          onClick={handleSubmit}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Submit Answers
+        </button>
+      ) : (
+        <div className="mt-4 font-semibold">
+          You scored {score} out of {questions.length}.
+        </div>
+      )}
+    </section>
+  );
+};
+
+// Section B - Short Answer
+const ShortAnswerSection = ({ questions, instructions }) => {
+  const [answers, setAnswers] = useState(Array(questions.length).fill(""));
+  const [submitted, setSubmitted] = useState(false);
+  const [evaluation, setEvaluation] = useState(null);
+  const [loading, setLoading] = useState(false); 
+
+  useEffect(() => {
+    setAnswers(Array(questions.length).fill(""));
+    setSubmitted(false);
+    setEvaluation(null);
+  }, [questions]);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      
+      const prompt = buildEvaluationPrompt(questions, answers);
+      const aiResponse = await evaluateAnswers(prompt); 
+      setEvaluation(aiResponse);
+      setSubmitted(true);
+    } catch (e) {
+      console.error(" Failed to evaluate:", e);
+      alert("Failed to evaluate. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section className="bg-white p-6 rounded-lg shadow mb-6">
+      <h2 className="text-xl font-bold mb-2">Section B: Short Answer Questions</h2>
+      <p className="text-gray-600 mb-4">{instructions}</p>
+      {questions.map((q, idx) => (
+        <div key={idx} className="mb-5">
+          <p className="font-medium mb-2">Q{idx + 1}. {q.question}</p>
+          <textarea
+            rows={4}
+            value={answers[idx]}
+            onChange={(e) => {
+              const newAns = [...answers];
+              newAns[idx] = e.target.value;
+              setAnswers(newAns);
+            }}
+            placeholder="Type your answer here..."
+            className="w-full p-3 border border-gray-300 rounded-lg"
+          />
+        </div>
+      ))}
+      {!submitted ? (
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className={`text-white px-4 py-2 rounded ${loading ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"}`}
+        >
+          {loading ? "Evaluating..." : "Evaluate using AI"}
+        </button>
+      ) : (
+        <div className="mt-4 font-semibold whitespace-pre-wrap text-gray-800 bg-blue-50 p-4 rounded">
+          {evaluation}
+        </div>
+      )}
+    </section>
+  );
+};
+
+
+// Section C - Short Notes
+const ShortNotesSection = ({ topics, instructions }) => {
+  const [answers, setAnswers] = useState(Array(topics.length).fill(""));
+  const [evaluation, setEvaluation] = useState(null);
+  const [loading, setLoading] = useState(false); 
+  const [submitted, setSubmitted] = useState(false);
+  useEffect(() => {
+    setAnswers(Array(topics.length).fill(""));
+  }, [topics]);
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      
+      const prompt = buildEvaluationC(topics, answers);
+      const aiResponse = await evaluateAnswers(prompt); 
+      setEvaluation(aiResponse);
+      setSubmitted(true);
+    } catch (e) {
+      console.error(" Failed to evaluate:", e);
+      alert(" Failed to evaluate. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <section className="bg-white p-6 rounded-lg shadow mb-6">
+      <h2 className="text-xl font-bold mb-2">Section C: Short Notes</h2>
+      <p className="text-gray-600 mb-4">{instructions}</p>
+      {topics.map((topic, idx) => (
+        <div key={idx} className="mb-5">
+          <p className="font-medium mb-2">{String.fromCharCode(97 + idx)}) {topic}</p>
+          <textarea
+            rows={3}
+            value={answers[idx]}
+            onChange={(e) => {
+              const newAns = [...answers];
+              newAns[idx] = e.target.value;
+              setAnswers(newAns);
+            }}
+            placeholder="Write a short note..."
+            className="w-full p-3 border border-gray-300 rounded-lg"
+          />
+        </div>
+      ))}
+      {!submitted ? (
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className={`text-white px-4 py-2 rounded ${loading ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"}`}
+        >
+          {loading ? "Evaluating..." : "Evaluate using AI"}
+        </button>
+      ) : (
+        <div className="mt-4 font-semibold whitespace-pre-wrap text-gray-800 bg-blue-50 p-4 rounded">
+          {evaluation}
+        </div>
+      )}
+    </section>
+  );
+};
+
+// Section D - Programming
+const ProgrammingSection = ({ questions, instructions }) => {
+  const [answers, setAnswers] = useState(Array(questions.length).fill(""));
+  const [evaluation, setEvaluation] = useState(null);
+  const [loading, setLoading] = useState(false); 
+  const [submitted, setSubmitted] = useState(false);
+  useEffect(() => {
+    setAnswers(Array(questions.length).fill(""));
+  }, [questions]);
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      
+      const prompt = buildEvaluationPrompt(questions, answers);
+      const aiResponse = await evaluateAnswers(prompt); 
+      setEvaluation(aiResponse);
+      setSubmitted(true);
+    } catch (e) {
+      console.error(" Failed to evaluate:", e);
+      alert("Failed to evaluate. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <section className="bg-white p-6 rounded-lg shadow mb-6">
+      <h2 className="text-xl font-bold mb-2">Section D: Programming Questions</h2>
+      <p className="text-gray-600 mb-4">{instructions}</p>
+      {questions.map((q, idx) => (
+        <div key={idx} className="mb-5">
+          <p className="font-medium mb-2">
+            Q{idx + 1}.{" "}
+            {q.question.split("\n").map((line, i) => (
+              <span key={i}>{line}<br /></span>
+            ))}
+          </p>
+          <textarea
+            rows={6}
+            value={answers[idx]}
+            onChange={(e) => {
+              const newAns = [...answers];
+              newAns[idx] = e.target.value;
+              setAnswers(newAns);
+            }}
+            placeholder="Write your program or answer here..."
+            className="w-full p-3 border border-gray-300 rounded-lg"
+          />
+        </div>
+      ))}
+      {!submitted ? (
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className={`text-white px-4 py-2 rounded ${loading ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"}`}
+        >
+          {loading ? "Evaluating..." : "Evaluate using AI"}
+        </button>
+      ) : (
+        <div className="mt-4 font-semibold whitespace-pre-wrap text-gray-800 bg-blue-50 p-4 rounded">
+          {evaluation}
+        </div>
+      )}
+    </section>
+  );
+};
+
+// Main Component
+export default function JavaExam() {
+  const [questionData, setQuestionData] = useState({
+     paper1: {
     SectionA: {
       instructions: "Multiple Choice Questions (1 mark each). Answer all questions.",
       questions: [
@@ -564,222 +898,59 @@ export const questionData = {
     ]
   }
 }
+  });
 
-};
+  const [selectedPaper, setSelectedPaper] = useState("paper1");
+  const [loading, setLoading] = useState(false);
 
+  const generateAIQuestion = async () => {
+    setLoading(true);
+    try {
+      const aiResponse = await callDeepSeek();
+      console.log("AI Raw Response:", aiResponse);
 
-// Section A: MCQ
-const MCQSection = ({ questions, instructions }) => {
-  const [answers, setAnswers] = useState(Array(questions.length).fill(""));
-  const [submitted, setSubmitted] = useState(false);
-  const [score, setScore] = useState(null);
+      const cleaned = aiResponse
+  .replace(/^[\s\S]*?```json\s*/i, '')  
+  .replace(/```[\s\S]*$/, '')           
+  .trim();
 
-  useEffect(() => {
-    setAnswers(Array(questions.length).fill(""));
-    setSubmitted(false);
-    setScore(null);
-  }, [questions]);
-
-  const handleSubmit = () => {
-    let correctCount = 0;
-    questions.forEach((q, idx) => {
-      if (answers[idx] === q.answer) {
-        correctCount += 1;
-      }
-    });
-    setScore(correctCount);
-    setSubmitted(true);
+      const parsed = JSON.parse(cleaned);
+      const newKey = `(AI) paper`;
+      setQuestionData(prev => ({
+        ...prev,
+        [newKey]: parsed.paper1,
+      }));
+      setSelectedPaper(newKey);
+    } catch (e) {
+      console.error("Failed to parse AI response", e);
+      alert(" Failed to generate AI paper. Try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <section className="bg-white p-6 rounded-lg shadow mb-6">
-      <h2 className="text-xl font-bold mb-2">Section A: Multiple Choice Questions</h2>
-      <p className="text-gray-600 mb-4">{instructions}</p>
-      {questions.map((q, idx) => (
-        <div key={q.id || idx} className="mb-5">
-          <p className="font-medium mb-2">
-            Q{idx + 1}.{" "}
-            {q.question.split("\n").map((line, i) => (
-              <span key={i}>
-                {line}
-                <br />
-              </span>
-            ))}
-          </p>
-          {q.options.map((opt, oIdx) => (
-            <label key={oIdx} className="block pl-4 mb-1">
-              <input
-                type="radio"
-                className="mr-2"
-                name={`mcq-${idx}`}
-                value={opt}
-                disabled={submitted}
-                checked={answers[idx] === opt}
-                onChange={() => {
-                  if (!submitted) {
-                    const newAns = [...answers];
-                    newAns[idx] = opt;
-                    setAnswers(newAns);
-                  }
-                }}
-              />
-              {opt}
-              {/* Show feedback after submission */}
-              {submitted && opt === q.answer && (
-                <span className="text-green-600 font-bold ml-2">&#10003;</span>
-              )}
-              {submitted && answers[idx] === opt && answers[idx] !== q.answer && (
-                <span className="text-red-600 font-bold ml-2">&#10007;</span>
-              )}
-            </label>
-          ))}
-        </div>
-      ))}
-      {!submitted ? (
-        <button
-          onClick={handleSubmit}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Submit Answers
-        </button>
-      ) : (
-        <div className="mt-4 font-semibold">
-          You scored {score} out of {questions.length}.
-        </div>
-      )}
-    </section>
-  );
-};
-
-// Section B: Short Answer
-const ShortAnswerSection = ({ questions, instructions }) => {
-  const [answers, setAnswers] = useState(Array(questions.length).fill(""));
-
-  React.useEffect(() => {
-    setAnswers(Array(questions.length).fill(""));
-  }, [questions]);
-
-  return (
-    <section className="bg-white p-6 rounded-lg shadow mb-6">
-      <h2 className="text-xl font-bold mb-2">Section B: Short Answer Questions</h2>
-      <p className="text-gray-600 mb-4">{instructions}</p>
-      {questions.map((q, idx) => (
-        <div key={q.id || idx} className="mb-5">
-          <p className="font-medium mb-2">
-            Q{idx + 1}. {q.question}
-          </p>
-          <textarea
-            rows={4}
-            value={answers[idx] || ""}
-            onChange={(e) => {
-              const newAns = [...answers];
-              newAns[idx] = e.target.value;
-              setAnswers(newAns);
-            }}
-            placeholder="Type your answer here..."
-            className="w-full p-3 border border-gray-300 rounded-lg"
-          />
-        </div>
-      ))}
-    </section>
-  );
-};
-
-// Section C: Short Notes
-const ShortNotesSection = ({ topics, instructions }) => {
-  const [answers, setAnswers] = useState(Array(topics.length).fill(""));
-
-  React.useEffect(() => {
-    setAnswers(Array(topics.length).fill(""));
-  }, [topics]);
-
-  return (
-    <section className="bg-white p-6 rounded-lg shadow mb-6">
-      <h2 className="text-xl font-bold mb-2">Section C: Short Notes</h2>
-      <p className="text-gray-600 mb-4">{instructions}</p>
-      {topics.map((topic, idx) => (
-        <div key={topic.id || idx} className="mb-5">
-          <p className="font-medium mb-2">
-            {String.fromCharCode(97 + idx)}) {topic}
-          </p>
-          <textarea
-            rows={3}
-            value={answers[idx] || ""}
-            onChange={(e) => {
-              const newAns = [...answers];
-              newAns[idx] = e.target.value;
-              setAnswers(newAns);
-            }}
-            placeholder="Write a short note..."
-            className="w-full p-3 border border-gray-300 rounded-lg"
-          />
-        </div>
-      ))}
-    </section>
-  );
-};
-
-// Section D: Programming
-const ProgrammingSection = ({ questions, instructions }) => {
-  const [answers, setAnswers] = useState(Array(questions.length).fill(""));
-
-  React.useEffect(() => {
-    setAnswers(Array(questions.length).fill(""));
-  }, [questions]);
-
-  return (
-    <section className="bg-white p-6 rounded-lg shadow mb-6">
-      <h2 className="text-xl font-bold mb-2">Section D: Programming Questions</h2>
-      <p className="text-gray-600 mb-4">{instructions}</p>
-      {questions.map((q, idx) => (
-        <div key={q.id || idx} className="mb-5">
-          <p className="font-medium mb-2">
-            Q{idx + 1}.{" "}
-            {q.question.split("\n").map((line, i) => (
-              <span key={i}>
-                {line}
-                <br />
-              </span>
-            ))}
-          </p>
-          <textarea
-            rows={6}
-            value={answers[idx] || ""}
-            onChange={(e) => {
-              const newAns = [...answers];
-              newAns[idx] = e.target.value;
-              setAnswers(newAns);
-            }}
-            placeholder="Write your program or answer here..."
-            className="w-full p-3 border border-gray-300 rounded-lg"
-          />
-        </div>
-      ))}
-    </section>
-  );
-};
-
-export default function JavaExam() {
-  const [selectedPaper, setSelectedPaper] = useState("paper1");
   const paperKeys = Object.keys(questionData);
   const currentPaperData = questionData[selectedPaper];
 
+  const isReady =
+    currentPaperData &&
+    currentPaperData.SectionA?.questions &&
+    currentPaperData.SectionB?.questions &&
+    currentPaperData.SectionC?.topics &&
+    currentPaperData.SectionD?.questions;
+
   return (
     <div className="max-w-4xl mx-auto p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-        📝 Java Exam Paper
-      </h1>
-      <ExamTimer duration={3600} />
-      {/* Paper Selection Dropdown */}
+      <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">📝 Java Exam Paper</h1>
+      <ExamTimer duration={3600}  resetSignal={timerResetSignal}/>
+
       <div className="mb-8 text-center">
-        <label htmlFor="paper-select" className="mr-2 font-medium">
-          Select Paper:
-        </label>
+        <label htmlFor="paper-select" className="mr-2 font-medium">Select Paper:</label>
         <select
           id="paper-select"
           value={selectedPaper}
           onChange={(e) => setSelectedPaper(e.target.value)}
-          className="border border-gray-300 rounded p-2"
+          className="border border-gray-300 rounded p-2 mr-4"
         >
           {paperKeys.map((paperKey) => (
             <option key={paperKey} value={paperKey}>
@@ -787,24 +958,40 @@ export default function JavaExam() {
             </option>
           ))}
         </select>
+        <button
+          onClick={generateAIQuestion}
+          disabled={loading}
+          className={`px-4 py-2 rounded text-white ${loading ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"}`}
+        >
+          {loading ? "Generating...Usually takes 2 minutes." : "Generate AI Paper"}
+        </button>
       </div>
-      {/* Render sections for the selected paper */}
-      <MCQSection
-        questions={currentPaperData.SectionA.questions}
-        instructions={currentPaperData.SectionA.instructions}
-      />
-      <ShortAnswerSection
-        questions={currentPaperData.SectionB.questions}
-        instructions={currentPaperData.SectionB.instructions}
-      />
-      <ShortNotesSection
-        topics={currentPaperData.SectionC.topics}
-        instructions={currentPaperData.SectionC.instructions}
-      />
-      <ProgrammingSection
-        questions={currentPaperData.SectionD.questions}
-        instructions={currentPaperData.SectionD.instructions}
-      />
+
+      {!isReady ? (
+        <div className="text-center py-20 text-gray-600 animate-pulse">
+          {loading ? "Generating paper..." : "Loading paper..."}
+        </div>
+      ) : (
+        <>
+          <MCQSection
+            questions={currentPaperData.SectionA.questions}
+            instructions={currentPaperData.SectionA.instructions}
+          />
+          <ShortAnswerSection
+            questions={currentPaperData.SectionB.questions}
+            instructions={currentPaperData.SectionB.instructions}
+          />
+          <ShortNotesSection
+            topics={currentPaperData.SectionC.topics}
+            instructions={currentPaperData.SectionC.instructions}
+          />
+          <ProgrammingSection
+            questions={currentPaperData.SectionD.questions}
+            instructions={currentPaperData.SectionD.instructions}
+          />
+        </>
+      )}
     </div>
   );
 }
+
