@@ -20,7 +20,7 @@ function ExamTimer({ duration = 3600, resetSignal }) {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [resetSignal]);
 
   const formatTime = (secs) => {
     const h = String(Math.floor(secs / 3600)).padStart(2, "0");
