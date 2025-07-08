@@ -75,6 +75,7 @@ Evaluate each response on a scale of 0 to 2 marks. For each, provide:
 - A brief evaluation (1-2 lines)
 - The awarded marks out of 2
 - The correct answer
+Also, the answer should be fully explained
 
 Format:
 Q1: [Evaluation]
