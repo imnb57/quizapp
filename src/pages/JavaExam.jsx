@@ -121,12 +121,15 @@ const MCQSection = ({ questions, instructions }) => {
         <div key={idx} className="mb-5">
           <p className="font-medium mb-2">
             Q{idx + 1}.{" "}
-            {q.question.split("\n").map((line, i) => (
-              <span key={i}>
-                {line}
-                <br />
-              </span>
-            ))}
+            {typeof q.question === "string"
+  ? q.question.split("\n").map((line, i) => (
+      <span key={i}>
+        {line}
+        <br />
+      </span>
+    ))
+  : <span className="text-red-500">Invalid question</span>}
+
           </p>
           {q.options.map((opt, oIdx) => (
             <label key={oIdx} className="block pl-4 mb-1">
